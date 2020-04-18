@@ -7,5 +7,5 @@ type Usecase interface {
 	SelectUserByID(int64) (*model.User, error)
 	CreateUser(*model.User) (int64, error)
 	UpdateUser(*model.User) (int64, error)
-	DeleteUSer(int64) (int64, error)
+	DeleteUser(int64) (int64, error)
 }

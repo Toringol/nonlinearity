@@ -2,9 +2,30 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/Toringol/nonlinearity/app/profileService/model"
+	"github.com/Toringol/nonlinearity/app/profileService/user"
 )
+
+// NewUserMemoryRepository - create connection and return new repository
+func NewUserMemoryRepository() user.Repository {
+	dsn := "" // TODO: get dsn from cfg
+	dsn += "&charset=utf8"
+	dsn += "&interpolateParams=true"
+
+	db, err := sql.Open("mysql", dsn)
+	db.SetMaxOpenConns(10)
+
+	err = db.Ping()
+	if err != nil {
+		log.Println("Error while Ping")
+	}
+
+	return &UserRepository{
+		DB: db,
+	}
+}
 
 // UserRepository - Database implemetation
 type UserRepository struct {
