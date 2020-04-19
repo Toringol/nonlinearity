@@ -9,8 +9,8 @@ import (
 )
 
 // NewUserMemoryRepository - create connection and return new repository
-func NewUserMemoryRepository() user.Repository {
-	dsn := "" // TODO: get dsn from cfg
+func NewUserMemoryRepository(dbConfig string) user.Repository {
+	dsn := dbConfig
 	dsn += "&charset=utf8"
 	dsn += "&interpolateParams=true"
 

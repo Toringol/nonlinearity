@@ -1,24 +1,31 @@
 package main
 
 import (
+	"log"
+
 	userhttp "github.com/Toringol/nonlinearity/app/profileService/user/delivery/http"
 	"github.com/Toringol/nonlinearity/app/profileService/user/repository"
 	"github.com/Toringol/nonlinearity/app/profileService/user/usecase"
 	"github.com/labstack/echo"
+	"github.com/spf13/viper"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
-const listenAddr = "127.0.0.1:8080"
-
 func main() {
-	e := echo.New()
 
-	userhttp.NewUserHandler(e, usecase.NewUserUsecase(repository.NewUserMemoryRepository()))
-
-	e.Logger.Warnf("start listening on %s", listenAddr)
-	err := e.Start("127.0.0.1:8080")
-	if err != nil {
-		e.Logger.Errorf("server error: %s", err)
+	viper.AddConfigPath("../../config")
+	viper.SetConfigName("config")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatal(err)
 	}
 
-	e.Logger.Warnf("shutdown")
+	listenAddr := viper.GetString("listenAddr")
+	databaseConfig := viper.GetString("databaseConfig")
+
+	e := echo.New()
+
+	userhttp.NewUserHandler(e, usecase.NewUserUsecase(repository.NewUserMemoryRepository(databaseConfig)))
+
+	e.Logger.Fatal(e.Start(listenAddr))
 }
