@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Toringol/nonlinearity/app/auth/model"
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -18,9 +19,9 @@ func NewSessionManager(conn redis.Conn) *SessionManager {
 	}
 }
 
-func (sm *SessionManager) Create(in *Session) (*SessionID, error) {
+func (sm *SessionManager) Create(in *model.Session) (*model.SessionID, error) {
 	log.Println("call Create", in)
-	id := SessionID{
+	id := model.SessionID{
 		ID: RandStringRunes(sessKeyLen),
 	}
 	dataSerialized, err := json.Marshal(in)
@@ -39,7 +40,7 @@ func (sm *SessionManager) Create(in *Session) (*SessionID, error) {
 	return &id, nil
 }
 
-func (sm *SessionManager) Check(in *SessionID) (*Session, error) {
+func (sm *SessionManager) Check(in *model.SessionID) (*model.Session, error) {
 	log.Println("call Check", in)
 	mkey := "sessions:" + in.ID
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
@@ -47,7 +48,7 @@ func (sm *SessionManager) Check(in *SessionID) (*Session, error) {
 		log.Println("cant get data:", err)
 		return nil, err
 	}
-	sess := &Session{}
+	sess := &model.Session{}
 	err = json.Unmarshal(data, sess)
 	if err != nil {
 		log.Println("cant unpack session data:", err)
@@ -56,7 +57,7 @@ func (sm *SessionManager) Check(in *SessionID) (*Session, error) {
 	return sess, nil
 }
 
-func (sm *SessionManager) Delete(in *SessionID) error {
+func (sm *SessionManager) Delete(in *model.SessionID) error {
 	log.Println("call Delete", in)
 	mkey := "sessions:" + in.ID
 	_, err := redis.Int(sm.redisConn.Do("DEL", mkey))
