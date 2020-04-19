@@ -1,7 +1,6 @@
 package session
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -19,7 +18,7 @@ func NewSessionManager(conn redis.Conn) *SessionManager {
 	}
 }
 
-func (sm *SessionManager) Create(ctx context.Context, in *Session) (*SessionID, error) {
+func (sm *SessionManager) Create(in *Session) (*SessionID, error) {
 	log.Println("call Create", in)
 	id := SessionID{
 		ID: RandStringRunes(sessKeyLen),
@@ -40,7 +39,7 @@ func (sm *SessionManager) Create(ctx context.Context, in *Session) (*SessionID, 
 	return &id, nil
 }
 
-func (sm *SessionManager) Check(ctx context.Context, in *SessionID) (*Session, error) {
+func (sm *SessionManager) Check(in *SessionID) (*Session, error) {
 	log.Println("call Check", in)
 	mkey := "sessions:" + in.ID
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
@@ -57,12 +56,12 @@ func (sm *SessionManager) Check(ctx context.Context, in *SessionID) (*Session, e
 	return sess, nil
 }
 
-func (sm *SessionManager) Delete(ctx context.Context, in *SessionID) (*Nothing, error) {
+func (sm *SessionManager) Delete(in *SessionID) error {
 	log.Println("call Delete", in)
 	mkey := "sessions:" + in.ID
 	_, err := redis.Int(sm.redisConn.Do("DEL", mkey))
 	if err != nil {
 		log.Println("redis error:", err)
 	}
-	return &Nothing{}, nil
+	return nil
 }
