@@ -44,6 +44,18 @@ func (repo *UserRepository) SelectByID(id int64) (*model.User, error) {
 	return record, nil
 }
 
+// SelectDataByLogin - select all user`s data by username
+func (repo *UserRepository) SelectByUsername(username string) (*model.User, error) {
+	record := &model.User{}
+	err := repo.DB.
+		QueryRow("SELECT id, login, password, avatar FROM users WHERE login = ?", username).
+		Scan(&record.ID, &record.Username, &record.Password, &record.Avatar)
+	if err != nil {
+		return nil, err
+	}
+	return record, nil
+}
+
 // Create - create new User in dataBase with default avatar
 func (repo *UserRepository) Create(elem *model.User) (int64, error) {
 	result, err := repo.DB.Exec(

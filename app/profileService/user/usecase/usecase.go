@@ -20,6 +20,11 @@ func (u userUsecase) SelectUserByID(id int64) (*model.User, error) {
 	return u.repo.SelectByID(id)
 }
 
+// SelectUserByUsername - return user`s data by username
+func (u userUsecase) SelectUserByUsername(username string) (*model.User, error) {
+	return u.repo.SelectByUsername(username)
+}
+
 // CreateUser - create new user
 func (u userUsecase) CreateUser(user *model.User) (int64, error) {
 	return u.repo.Create(user)
