@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	userhttp "github.com/Toringol/nonlinearity/app/profileService/user/delivery/http"
-	"github.com/Toringol/nonlinearity/app/profileService/user/repository"
-	"github.com/Toringol/nonlinearity/app/profileService/user/usecase"
+	userhttp "github.com/Toringol/nonlinearity/app/user/delivery/http"
+	"github.com/Toringol/nonlinearity/app/user/repository"
+	"github.com/Toringol/nonlinearity/app/user/usecase"
 	"github.com/Toringol/nonlinearity/config"
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"

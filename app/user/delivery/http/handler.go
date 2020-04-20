@@ -8,7 +8,7 @@ import (
 	"github.com/Toringol/nonlinearity/app/auth/cookies"
 
 	"github.com/Toringol/nonlinearity/app/model"
-	"github.com/Toringol/nonlinearity/app/profileService/user"
+	"github.com/Toringol/nonlinearity/app/user"
 	"github.com/labstack/echo"
 )
 
