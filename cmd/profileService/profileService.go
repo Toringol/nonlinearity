@@ -6,6 +6,7 @@ import (
 	userhttp "github.com/Toringol/nonlinearity/app/profileService/user/delivery/http"
 	"github.com/Toringol/nonlinearity/app/profileService/user/repository"
 	"github.com/Toringol/nonlinearity/app/profileService/user/usecase"
+	"github.com/Toringol/nonlinearity/config"
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"
 
@@ -14,10 +15,8 @@ import (
 
 func main() {
 
-	viper.AddConfigPath("../../config")
-	viper.SetConfigName("config")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal(err)
+	if err := config.Init(); err != nil {
+		log.Fatalf("%s", err.Error())
 	}
 
 	listenAddr := viper.GetString("listenAddr")
