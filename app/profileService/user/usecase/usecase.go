@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/Toringol/nonlinearity/app/profileService/model"
+	"github.com/Toringol/nonlinearity/app/model"
 	"github.com/Toringol/nonlinearity/app/profileService/user"
 )
 

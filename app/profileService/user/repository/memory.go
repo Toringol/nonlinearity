@@ -4,13 +4,14 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/Toringol/nonlinearity/app/profileService/model"
+	"github.com/Toringol/nonlinearity/app/model"
 	"github.com/Toringol/nonlinearity/app/profileService/user"
+	"github.com/spf13/viper"
 )
 
 // NewUserMemoryRepository - create connection and return new repository
-func NewUserMemoryRepository(dbConfig string) user.Repository {
-	dsn := dbConfig
+func NewUserMemoryRepository() user.Repository {
+	dsn := viper.GetString("databaseConfig")
 	dsn += "&charset=utf8"
 	dsn += "&interpolateParams=true"
 

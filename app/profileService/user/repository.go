@@ -1,6 +1,6 @@
 package user
 
-import "github.com/Toringol/nonlinearity/app/profileService/model"
+import "github.com/Toringol/nonlinearity/app/model"
 
 // Repository - funcs interact with DataBase
 type Repository interface {

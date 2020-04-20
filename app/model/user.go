@@ -7,9 +7,9 @@ import (
 
 // User - user data in DataBase
 type User struct {
-	ID               int64            `json:"id"`
+	ID               int64            `json:"id,omitempty"`
 	Username         string           `json:"username"`
-	Password         string           `json:"password"`
+	Password         string           `json:"password,omitempty"`
 	Avatar           string           `json:"image"`
 	UserPersonalData UserPersonalData `json:"personalData"`
 }

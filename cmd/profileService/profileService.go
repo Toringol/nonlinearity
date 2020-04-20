@@ -20,11 +20,10 @@ func main() {
 	}
 
 	listenAddr := viper.GetString("listenAddr")
-	databaseConfig := viper.GetString("databaseConfig")
 
 	e := echo.New()
 
-	userhttp.NewUserHandler(e, usecase.NewUserUsecase(repository.NewUserMemoryRepository(databaseConfig)))
+	userhttp.NewUserHandler(e, usecase.NewUserUsecase(repository.NewUserMemoryRepository()))
 
 	e.Logger.Fatal(e.Start(listenAddr))
 }
