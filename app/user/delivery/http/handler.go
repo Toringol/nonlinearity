@@ -1,15 +1,18 @@
 package http
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/Toringol/nonlinearity/app/auth/cookies"
+	"github.com/Toringol/nonlinearity/tools"
 
 	"github.com/Toringol/nonlinearity/app/model"
 	"github.com/Toringol/nonlinearity/app/user"
 	"github.com/labstack/echo"
+	"github.com/spf13/viper"
 )
 
 // userHandlers - http handlers structure
@@ -27,8 +30,12 @@ func NewUserHandler(e *echo.Echo, us user.Usecase) {
 
 	e.POST("/signup/", handlers.handleSignUp)
 	e.POST("/profile/", handlers.handleChangeUserProfile)
+	e.POST("/changeAvatar/", handlers.handleChangeAvatar)
 }
 
+// handleSignUp - create user record in DB if username is not occupied
+// user`ll get default avatar from AWS S3 bucket
+// setup session
 func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 	userInput := new(model.User)
 
@@ -36,7 +43,17 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
-	userInput.Avatar = "default" // TODO: change it by adding normal path
+	// Check user with input username in DB
+	_, err := h.usecase.SelectUserByUsername(userInput.Username)
+	switch {
+	case err == sql.ErrNoRows:
+		return ctx.JSON(http.StatusConflict, "User with this username already exist")
+	case err != nil:
+		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+	}
+
+	// Path to AWS S3 bucket and defaulAvatar
+	userInput.Avatar = viper.GetString("imageStoragePath") + "avatars/defaultAvatar"
 
 	lastID, err := h.usecase.CreateUser(userInput)
 	if err != nil {
@@ -55,6 +72,8 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, userInput)
 }
 
+// handleSignIn - check user input
+// if all ok -> setup session
 func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 	authCredentials := new(model.User)
 
@@ -77,6 +96,7 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, authCredentials)
 }
 
+// handleGetUserProfile - check session and give data to user
 func (h *userHandlers) handleGetUserProfile(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
@@ -94,6 +114,9 @@ func (h *userHandlers) handleGetUserProfile(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, userData)
 }
 
+// handleChangeUserProfile - check session then get old information from DB
+// if some information user trying to change we replace it
+// then update record in DB with new data
 func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
@@ -144,6 +167,35 @@ func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 	return nil
 }
 
+// handleChangeAvatar - check session if ok -> loadAvatar to AWS S3 bucket
+// then change user`s avatar column in DB
+func (h *userHandlers) handleChangeAvatar(ctx echo.Context) error {
+	session, err := cookies.СheckSession(ctx)
+	if err != nil {
+		return nil
+	}
+
+	fileName, err := tools.LoadAvatar(ctx)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+	}
+
+	oldUserData, err := h.usecase.SelectUserByUsername(session.Username)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+	}
+
+	oldUserData.Avatar = viper.GetString("imageStoragePath") + fileName
+
+	_, err = h.usecase.UpdateUser(oldUserData)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+	}
+
+	return ctx.JSON(http.StatusOK, viper.GetString("imageStoragePath")+fileName)
+}
+
+// handleLogout - delete session
 func (h *userHandlers) handleLogout(ctx echo.Context) error {
 	err := cookies.ClearSession(ctx)
 	if err != nil {

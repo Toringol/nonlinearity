@@ -3,6 +3,8 @@ module github.com/Toringol/nonlinearity
 go 1.14
 
 require (
+	github.com/aws/aws-sdk-go v1.30.14
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/securecookie v1.1.1

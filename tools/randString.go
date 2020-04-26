@@ -15,6 +15,8 @@ const (
 
 var src = rand.NewSource(time.Now().UnixNano())
 
+// RandStringBytesMaskImprSrcSB - create random string required length
+// this func do it with enough speed
 func RandStringBytesMaskImprSrcSB(n int) string {
 	sb := strings.Builder{}
 	sb.Grow(n)
