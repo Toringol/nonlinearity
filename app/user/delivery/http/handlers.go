@@ -2,7 +2,6 @@ package http
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"time"
 
@@ -40,16 +39,16 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 	userInput := new(model.User)
 
 	if err := ctx.Bind(userInput); err != nil {
-		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	// Check user with input username in DB
 	_, err := h.usecase.SelectUserByUsername(userInput.Username)
 	switch {
 	case err == sql.ErrNoRows:
-		return ctx.JSON(http.StatusConflict, "User with this username already exist")
+		return echo.NewHTTPError(http.StatusConflict, "This username is occupied")
 	case err != nil:
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
 	// Path to AWS S3 bucket and defaulAvatar
@@ -57,19 +56,17 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 
 	lastID, err := h.usecase.CreateUser(userInput)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
 	userInput.ID = lastID
 
-	cookie, err := cookies.SetSession(ctx, userInput)
+	_, err = cookies.SetSession(ctx, userInput)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Cookie set error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Cookie set error")
 	}
 
-	log.Println(cookie)
-
-	return ctx.JSON(http.StatusOK, userInput)
+	return ctx.JSON(http.StatusCreated, userInput)
 }
 
 // handleSignIn - check user input
@@ -78,20 +75,22 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 	authCredentials := new(model.User)
 
 	if err := ctx.Bind(authCredentials); err != nil {
-		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	userRecord, err := h.usecase.SelectUserByUsername(authCredentials.Username)
-	if err != nil || authCredentials.Password != userRecord.Password {
-		return ctx.JSON(http.StatusUnauthorized, "Incorrect username or password!")
-	}
-
-	cookie, err := cookies.SetSession(ctx, userRecord)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	log.Println(cookie)
+	if authCredentials.Password != userRecord.Password {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Incorrect username or password")
+	}
+
+	_, err = cookies.SetSession(ctx, userRecord)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Cookie set error")
+	}
 
 	return ctx.JSON(http.StatusOK, authCredentials)
 }
@@ -100,12 +99,12 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 func (h *userHandlers) handleGetUserProfile(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return nil
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	userData, err := h.usecase.SelectUserByUsername(session.Username)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
 	userData.ID = 0
@@ -120,18 +119,18 @@ func (h *userHandlers) handleGetUserProfile(ctx echo.Context) error {
 func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return nil
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	oldUserData, err := h.usecase.SelectUserByUsername(session.Username)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
 	changeUserData := new(model.User)
 
 	if err := ctx.Bind(changeUserData); err != nil {
-		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	changeUserData.ID = oldUserData.ID
@@ -150,21 +149,17 @@ func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 		changeUserData.UserPersonalData.Status = oldUserData.UserPersonalData.Status
 	}
 
-	affected, err := h.usecase.UpdateUser(changeUserData)
+	_, err = h.usecase.UpdateUser(changeUserData)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	log.Println("Update affectedRows: ", affected)
-
-	cookie, err := cookies.SetSession(ctx, changeUserData)
+	_, err = cookies.SetSession(ctx, changeUserData)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Cookie set error")
 	}
 
-	log.Println(cookie)
-
-	return nil
+	return ctx.JSON(http.StatusCreated, "")
 }
 
 // handleChangeAvatar - check session if ok -> loadAvatar to AWS S3 bucket
@@ -172,34 +167,34 @@ func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 func (h *userHandlers) handleChangeAvatar(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return nil
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
 
 	fileName, err := tools.LoadAvatar(ctx)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	oldUserData, err := h.usecase.SelectUserByUsername(session.Username)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
 	oldUserData.Avatar = viper.GetString("imageStoragePath") + fileName
 
 	_, err = h.usecase.UpdateUser(oldUserData)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	return ctx.JSON(http.StatusOK, viper.GetString("imageStoragePath")+fileName)
+	return ctx.JSON(http.StatusCreated, viper.GetString("imageStoragePath")+fileName)
 }
 
 // handleLogout - delete session
 func (h *userHandlers) handleLogout(ctx echo.Context) error {
 	err := cookies.ClearSession(ctx)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "Internal Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Cookie del error")
 	}
 
 	return ctx.JSON(http.StatusOK, "")
