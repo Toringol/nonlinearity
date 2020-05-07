@@ -51,7 +51,10 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	// Path to AWS S3 bucket and defaulAvatar
+	// Convert open pass to secure pass
+	userInput.Password = string(tools.ConvertPass(userInput.Password))
+
+	// Path to AWS S3 bucket and defaultAvatar
 	userInput.Avatar = viper.GetString("imageStoragePath") + "avatars/defaultAvatar"
 
 	lastID, err := h.usecase.CreateUser(userInput)
@@ -83,7 +86,7 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	if authCredentials.Password != userRecord.Password {
+	if !tools.CheckPass(tools.ConvertPass(authCredentials.Password), userRecord.Password) {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Incorrect username or password")
 	}
 

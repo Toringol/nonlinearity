@@ -14,5 +14,5 @@ require (
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/spf13/viper v1.6.3
 	github.com/stretchr/testify v1.5.1
-	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904 // indirect
+	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904
 )
