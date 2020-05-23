@@ -1,12 +1,21 @@
 package model
 
+import (
+	"time"
+
+	"gopkg.in/mgo.v2/bson"
+)
+
 // Story - record structure for mongoDB
 type Story struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Author      string `json:"author"`
-	Type        string `json:"type"`
-	Views       string `json:"views"`
-	Rating      int    `json:"rating"`
+	ID              bson.ObjectId `json:"id" bson:"_id"`
+	Title           string        `json:"title" bson:"title"`
+	Description     string        `json:"description" bson:"description"`
+	Image           string        `json:"image" bson:"image"`
+	Author          string        `json:"author" bson:"author"`
+	Genres          []string      `json:"genres" bson:"genres"`
+	EditorChoice    bool          `json:"editorChoice" bson:"editorChoice"`
+	Rating          float64       `json:"rating" bson:"rating"`
+	Views           int           `json:"views" bson:"views"`
+	PublicationDate time.Time     `json:"publicationDate" bson:"publicationDate"`
 }

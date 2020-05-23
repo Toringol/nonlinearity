@@ -2,28 +2,28 @@ package model
 
 import (
 	"encoding/json"
-	"time"
 )
 
 // User - user data in DataBase
 type User struct {
-	ID               int64            `json:"id,omitempty"`
-	Username         string           `json:"username"`
-	Password         string           `json:"password,omitempty"`
-	Avatar           string           `json:"avatar"`
-	UserPersonalData UserPersonalData `json:"personalData"`
-}
-
-// UserPersonalData - personal data of User
-type UserPersonalData struct {
-	DateOfBirth  time.Time `json:"birthday"`
-	Relationship string    `json:"relationship"`
-	Status       string    `json:"status"`
-}
-
-// Favourites - the best categories of User
-type Favourites struct {
-	ID         int64           `json:"id"`
-	UserID     int64           `json:"userid"`
+	ID       int64  `json:"id,omitempty"`
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
+	Avatar   string `json:"avatar"`
+	// the best categories of User in slice byte format
 	Favourited json.RawMessage `json:"favourited"`
+}
+
+// FavouriteCategories - the number of counters
+// preferences of User that
+// futher decodes to json.RawMessage struct User
+type FavouriteCategories struct {
+	Drama     int64 `json:"drama"`
+	Romance   int64 `json:"romance"`
+	Comedy    int64 `json:"comedy"`
+	Horror    int64 `json:"horror"`
+	Detective int64 `json:"detective"`
+	Fantasy   int64 `json:"fantasy"`
+	Action    int64 `json:"action"`
+	Realism   int64 `json:"realism"`
 }

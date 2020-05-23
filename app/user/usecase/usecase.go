@@ -5,14 +5,14 @@ import (
 	"github.com/Toringol/nonlinearity/app/user"
 )
 
-// NewUserUsecase - create new usercase
-func NewUserUsecase(userRepo user.Repository) user.Usecase {
-	return userUsecase{repo: userRepo}
-}
-
 // userUsecase - connector database and user
 type userUsecase struct {
 	repo user.Repository
+}
+
+// NewUserUsecase - create new usercase
+func NewUserUsecase(userRepo user.Repository) user.Usecase {
+	return userUsecase{repo: userRepo}
 }
 
 // SelectUserByID - return user`s data by ID

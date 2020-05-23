@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
@@ -19,10 +20,20 @@ func TestSelectByID(t *testing.T) {
 
 	var elemID int64 = 1
 
+	favourites := model.FavouriteCategories{}
+
+	massage, err := json.Marshal(favourites)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	rawFavourites := json.RawMessage(massage)
+
 	rows := sqlmock.
 		NewRows([]string{"id", "login", "password", "avatar"})
 	expect := []*model.User{
-		{elemID, "toringol", "12345", "default", model.UserPersonalData{}},
+		{elemID, "toringol", "12345", "default", rawFavourites},
 	}
 
 	for _, item := range expect {
@@ -99,10 +110,20 @@ func TestSelectByUsername(t *testing.T) {
 	var elemID int64 = 1
 	login := "toringol"
 
+	favourites := model.FavouriteCategories{}
+
+	massage, err := json.Marshal(favourites)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	rawFavourites := json.RawMessage(massage)
+
 	rows := sqlmock.
 		NewRows([]string{"id", "login", "password", "avatar"})
 	expect := []*model.User{
-		{elemID, "toringol", "12345", "default", model.UserPersonalData{}},
+		{elemID, "toringol", "12345", "default", rawFavourites},
 	}
 
 	for _, item := range expect {
@@ -234,14 +255,24 @@ func TestUpdate(t *testing.T) {
 
 	var elemID int64 = 1
 
+	favourites := model.FavouriteCategories{}
+
+	massage, err := json.Marshal(favourites)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	rawFavourites := json.RawMessage(massage)
+
 	rows := sqlmock.
 		NewRows([]string{"id", "login", "password", "avatar"})
 	testInput := []*model.User{
-		{elemID, "toringol", "12345", "default", model.UserPersonalData{}},
-		{elemID + 1, "user", "pass", "default", model.UserPersonalData{}},
+		{elemID, "toringol", "12345", "default", rawFavourites},
+		{elemID + 1, "user", "pass", "default", rawFavourites},
 	}
 
-	expect := &model.User{elemID, "sergey", "23623", "default", model.UserPersonalData{}}
+	expect := &model.User{elemID, "sergey", "23623", "default", rawFavourites}
 
 	for _, item := range testInput {
 		rows = rows.AddRow(item.ID, item.Username, item.Password, item.Avatar)
@@ -296,11 +327,21 @@ func TestDelete(t *testing.T) {
 
 	var elemID int64 = 1
 
+	favourites := model.FavouriteCategories{}
+
+	massage, err := json.Marshal(favourites)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	rawFavourites := json.RawMessage(massage)
+
 	rows := sqlmock.
 		NewRows([]string{"id", "login", "password", "avatar"})
 	testInput := []*model.User{
-		{elemID, "toringol", "12345", "default", model.UserPersonalData{}},
-		{elemID + 1, "user", "pass", "default", model.UserPersonalData{}},
+		{elemID, "toringol", "12345", "default", rawFavourites},
+		{elemID + 1, "user", "pass", "default", rawFavourites},
 	}
 
 	for _, item := range testInput {

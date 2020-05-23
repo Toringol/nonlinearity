@@ -9,9 +9,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// UserRepository - Database implemetation
+type UserRepository struct {
+	DB *sql.DB
+}
+
 // NewUserMemoryRepository - create connection and return new repository
 func NewUserMemoryRepository() user.Repository {
-	dsn := viper.GetString("databaseConfig")
+	dsn := viper.GetString("databaseUsersConfig")
 	dsn += "&charset=utf8"
 	dsn += "&interpolateParams=true"
 
@@ -26,11 +31,6 @@ func NewUserMemoryRepository() user.Repository {
 	return &UserRepository{
 		DB: db,
 	}
-}
-
-// UserRepository - Database implemetation
-type UserRepository struct {
-	DB *sql.DB
 }
 
 // SelectByID - select all user`s data by ID
