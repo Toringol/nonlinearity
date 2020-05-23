@@ -12,6 +12,7 @@ type Story struct {
 	Title           string        `json:"title" bson:"title"`
 	Description     string        `json:"description" bson:"description"`
 	Image           string        `json:"image" bson:"image"`
+	StoryPath       string        `json:"storyPath" bson:"storyPath"`
 	Author          string        `json:"author" bson:"author"`
 	Genres          []string      `json:"genres" bson:"genres"`
 	EditorChoice    bool          `json:"editorChoice" bson:"editorChoice"`

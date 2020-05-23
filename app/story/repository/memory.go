@@ -74,6 +74,7 @@ func (repo *StoryRepository) Update(story *model.Story) error {
 	oldStory.Title = story.Title
 	oldStory.Description = story.Description
 	oldStory.Image = story.Image
+	oldStory.StoryPath = story.StoryPath
 	oldStory.Author = story.Author
 	oldStory.EditorChoice = story.EditorChoice
 	oldStory.Genres = story.Genres
