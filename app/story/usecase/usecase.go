@@ -20,6 +20,21 @@ func (su storyUsecase) SelectStoryByID(id string) (*model.Story, error) {
 	return su.repo.SelectByID(id)
 }
 
+// SelectTopHeadings - return top 10 stories for each heading
+func (su storyUsecase) SelectTopHeadings(headings map[string]string) (*model.StoryHeadings, error) {
+	return su.repo.SelectTopHeadings(headings)
+}
+
+// UpdateStoryViews - inc story views
+func (su storyUsecase) UpdateStoryViews(id string) error {
+	return su.repo.UpdateViews(id)
+}
+
+// UpdateStoryRating - update story rating
+func (su storyUsecase) UpdateStoryRating(reqRating *model.RequestRating) (*model.Story, error) {
+	return su.repo.UpdateRating(reqRating)
+}
+
 // ListStories - return all info about all stories in story DB
 func (su storyUsecase) ListStories() ([]*model.Story, error) {
 	return su.repo.List()

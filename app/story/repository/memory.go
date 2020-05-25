@@ -6,6 +6,7 @@ import (
 	"github.com/Toringol/nonlinearity/app/model"
 	"github.com/Toringol/nonlinearity/app/story"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -45,6 +46,32 @@ func (repo *StoryRepository) List() ([]*model.Story, error) {
 	return stories, nil
 }
 
+// SelectTopHeadings - return top headings from story DB
+func (repo *StoryRepository) SelectTopHeadings(headings map[string]string) (*model.StoryHeadings, error) {
+	storyHeadings := &model.StoryHeadings{}
+
+	for title, heading := range headings {
+		findOptions := options.Find()
+		findOptions.SetSort(bson.D{{heading, -1}})
+		findOptions.SetLimit(10)
+
+		stories := []*model.Story{}
+
+		if err := repo.collection().Find(findOptions).All(&stories); err != nil {
+			return nil, err
+		}
+
+		heading := &model.Heading{
+			Title:   title,
+			Stories: stories,
+		}
+
+		storyHeadings.Headings = append(storyHeadings.Headings, heading)
+	}
+
+	return storyHeadings, nil
+}
+
 // SelectByID - return story info by ID
 func (repo *StoryRepository) SelectByID(id string) (*model.Story, error) {
 	story := &model.Story{}
@@ -76,13 +103,44 @@ func (repo *StoryRepository) Update(story *model.Story) error {
 	oldStory.Image = story.Image
 	oldStory.StoryPath = story.StoryPath
 	oldStory.Author = story.Author
-	oldStory.EditorChoice = story.EditorChoice
 	oldStory.Genres = story.Genres
 	oldStory.PublicationDate = story.PublicationDate
-	oldStory.Rating = story.Rating
-	oldStory.Views = story.Views
 
 	return repo.collection().Update(bson.M{"_id": oldStory.ID}, &oldStory)
+}
+
+// UpdateViews - inc views
+func (repo *StoryRepository) UpdateViews(id string) error {
+	change := mgo.Change{
+		Update:    bson.M{"$inc": bson.M{"views": 1}},
+		ReturnNew: false,
+	}
+
+	story := &model.Story{}
+
+	if _, err := repo.collection().Find(bson.M{"_id": id}).Apply(change, &story); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateRating - update rating
+func (repo *StoryRepository) UpdateRating(reqRating *model.RequestRating) (*model.Story, error) {
+	story := &model.Story{}
+
+	if err := repo.collection().Find(bson.M{"_id": reqRating.ID}).One(&story); err != nil {
+		return nil, err
+	}
+
+	story.RatingsNumber++
+	story.Rating = (story.Rating*float64((story.RatingsNumber-1)) + reqRating.Rating) / float64(story.RatingsNumber)
+
+	if err := repo.collection().Update(bson.M{"_id": story.ID}, &story); err != nil {
+		return nil, err
+	}
+
+	return story, nil
 }
 
 // Delete - delete story from story DB
