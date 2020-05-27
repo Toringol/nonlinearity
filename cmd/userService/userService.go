@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("%s", err.Error())
 	}
 
-	listenAddr := viper.GetString("listenAddrUserService")
+	listenAddr := viper.GetString("listenAddr")
 
 	e := echo.New()
 

@@ -3,7 +3,7 @@ package http
 import (
 	"database/sql"
 	"net/http"
-	"time"
+	"strconv"
 
 	"github.com/Toringol/nonlinearity/app/auth/cookies"
 	"github.com/Toringol/nonlinearity/tools"
@@ -23,6 +23,7 @@ type userHandlers struct {
 func NewUserHandler(e *echo.Echo, us user.Usecase) {
 	handlers := userHandlers{usecase: us}
 
+	// User handlers
 	e.GET("/signin/", handlers.handleSignIn)
 	e.GET("/profile/", handlers.handleGetUserProfile)
 	e.GET("/logout/", handlers.handleLogout)
@@ -30,6 +31,13 @@ func NewUserHandler(e *echo.Echo, us user.Usecase) {
 	e.POST("/signup/", handlers.handleSignUp)
 	e.POST("/profile/", handlers.handleChangeUserProfile)
 	e.POST("/changeAvatar/", handlers.handleChangeAvatar)
+
+	// Story handlers
+	e.GET("/getStory", handlers.handlerGetStoryInfo)
+	e.GET("/topStories", handlers.handlerGetTopHeadings)
+
+	e.POST("/endStory", handlers.handlerEndStory)
+	e.POST("/rateStory", handlers.handlerRateStory)
 }
 
 // handleSignUp - create user record in DB if username is not occupied
@@ -138,18 +146,11 @@ func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 
 	changeUserData.ID = oldUserData.ID
 	changeUserData.Avatar = oldUserData.Avatar
-	nullTime := time.Time{}
 
 	if changeUserData.Username == "" {
 		changeUserData.Username = oldUserData.Username
 	} else if changeUserData.Password == "" {
 		changeUserData.Password = oldUserData.Password
-	} else if changeUserData.UserPersonalData.DateOfBirth == nullTime {
-		changeUserData.UserPersonalData.DateOfBirth = oldUserData.UserPersonalData.DateOfBirth
-	} else if changeUserData.UserPersonalData.Relationship == "" {
-		changeUserData.UserPersonalData.Relationship = oldUserData.UserPersonalData.Relationship
-	} else if changeUserData.UserPersonalData.Status == "" {
-		changeUserData.UserPersonalData.Status = oldUserData.UserPersonalData.Status
 	}
 
 	_, err = h.usecase.UpdateUser(changeUserData)
@@ -201,4 +202,75 @@ func (h *userHandlers) handleLogout(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, "")
+}
+
+// handlerGetStoryInfo - get story information from story DB
+func (h *userHandlers) handlerGetStoryInfo(ctx echo.Context) error {
+
+	idStr := ctx.QueryParam("id")
+	if idStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "")
+	}
+
+	story, err := h.usecase.SelectStoryByID(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	return ctx.JSON(http.StatusOK, story)
+}
+
+// handlerGetTopHeadings - return top 10 stories in their headings
+func (h *userHandlers) handlerGetTopHeadings(ctx echo.Context) error {
+
+	headings := map[string]string{
+		"Now popular":   "views",
+		"Short stories": "description",
+		"New":           "publicationDate",
+	}
+
+	storyHeadings, err := h.usecase.SelectTopHeadingsStories(headings)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	return ctx.JSON(http.StatusOK, storyHeadings)
+}
+
+// handlerEndStory - inc story views
+func (h *userHandlers) handlerEndStory(ctx echo.Context) error {
+
+	requestID := new(model.RequestIDStory)
+
+	if err := ctx.Bind(requestID); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	if _, err := h.usecase.UpdateStoryViews(requestID.ID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	return ctx.JSON(http.StatusOK, nil)
+}
+
+// handlerRateStory - update story rating and return new data of story
+func (h *userHandlers) handlerRateStory(ctx echo.Context) error {
+
+	reqRating := new(model.RequestRating)
+
+	if err := ctx.Bind(reqRating); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	story, err := h.usecase.UpdateStoryRating(reqRating)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	return ctx.JSON(http.StatusOK, story)
 }

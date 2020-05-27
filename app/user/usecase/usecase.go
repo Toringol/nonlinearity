@@ -17,25 +17,65 @@ func NewUserUsecase(userRepo user.Repository) user.Usecase {
 
 // SelectUserByID - return user`s data by ID
 func (u userUsecase) SelectUserByID(id int64) (*model.User, error) {
-	return u.repo.SelectByID(id)
+	return u.repo.SelectUserByID(id)
 }
 
 // SelectUserByUsername - return user`s data by username
 func (u userUsecase) SelectUserByUsername(username string) (*model.User, error) {
-	return u.repo.SelectByUsername(username)
+	return u.repo.SelectUserByUsername(username)
 }
 
 // CreateUser - create new user
 func (u userUsecase) CreateUser(user *model.User) (int64, error) {
-	return u.repo.Create(user)
+	return u.repo.CreateUser(user)
 }
 
 // UpdateUser - update user`s data
 func (u userUsecase) UpdateUser(user *model.User) (int64, error) {
-	return u.repo.Update(user)
+	return u.repo.UpdateUser(user)
 }
 
 // DeleteUser - delete user data
 func (u userUsecase) DeleteUser(id int64) (int64, error) {
-	return u.repo.Delete(id)
+	return u.repo.DeleteUser(id)
+}
+
+// SelectStoryByID - select story`s data
+func (u userUsecase) SelectStoryByID(id int64) (*model.Story, error) {
+	return u.repo.SelectStoryByID(id)
+}
+
+// SelectTopHeadingsStories - return top stories
+func (u userUsecase) SelectTopHeadingsStories(headings map[string]string) (*model.StoryHeadings, error) {
+	return u.repo.SelectTopHeadingsStories(headings)
+}
+
+// UpdateStoryViews - increment story views
+func (u userUsecase) UpdateStoryViews(id int64) (int64, error) {
+	return u.repo.UpdateStoryViews(id)
+}
+
+// UpdateStoryRating - update story rating
+func (u userUsecase) UpdateStoryRating(reqRating *model.RequestRating) (int64, error) {
+	return u.repo.UpdateStoryRating(reqRating)
+}
+
+// ListStories - return all stories
+func (u userUsecase) ListStories() ([]*model.Story, error) {
+	return u.repo.ListStories()
+}
+
+// CreateStory - create new story
+func (u userUsecase) CreateStory(story *model.Story) (int64, error) {
+	return u.repo.CreateStory(story)
+}
+
+// UpdateStory - update story record
+func (u userUsecase) UpdateStory(story *model.Story) (int64, error) {
+	return u.repo.UpdateStory(story)
+}
+
+// DeleteStory - delete story by ID
+func (u userUsecase) DeleteStory(id int64) (int64, error) {
+	return u.repo.DeleteStory(id)
 }
