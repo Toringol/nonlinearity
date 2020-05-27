@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	sessManager *sessionManager.SessionManager
+	SessManager *sessionManager.SessionManager
 )
 
 // cookieHandler - secure cookie with two concatinated parts
@@ -23,7 +23,7 @@ var cookieHandler = securecookie.New(
 
 // SetSession - call to sessManager to create record in redisDB and set cookie in ctx
 func SetSession(ctx echo.Context, userData *model.User) (*http.Cookie, error) {
-	sessID, err := sessManager.Create(&model.Session{
+	sessID, err := SessManager.Create(&model.Session{
 		Username:  userData.Username,
 		Useragent: ctx.Request().UserAgent(),
 	})
@@ -53,7 +53,7 @@ func SetSession(ctx echo.Context, userData *model.User) (*http.Cookie, error) {
 
 // ClearSession - call to sessManager to delete record in redisDB and clear cookie in ctx
 func ClearSession(ctx echo.Context) error {
-	err := sessManager.Delete(ReadSessionID(ctx))
+	err := SessManager.Delete(ReadSessionID(ctx))
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func СheckSession(ctx echo.Context) (*model.Session, error) {
 		return nil, nil
 	}
 
-	sess, err := sessManager.Check(cookieSessionID)
+	sess, err := SessManager.Check(cookieSessionID)
 	if err != nil {
 		return nil, err
 	}

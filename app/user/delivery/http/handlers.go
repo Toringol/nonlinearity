@@ -63,7 +63,10 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 	userInput.Password = string(tools.ConvertPass(userInput.Password))
 
 	// Path to AWS S3 bucket and defaultAvatar
-	userInput.Avatar = viper.GetString("imageStoragePath") + "avatars/defaultAvatar"
+	userInput.Avatar = viper.GetString("storagePath") + "avatars/defaultAvatar"
+
+	// Favourites - for new user its empty structure
+	userInput.Favourited = []byte("{}")
 
 	lastID, err := h.usecase.CreateUser(userInput)
 	if err != nil {
@@ -184,14 +187,14 @@ func (h *userHandlers) handleChangeAvatar(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	oldUserData.Avatar = viper.GetString("imageStoragePath") + fileName
+	oldUserData.Avatar = viper.GetString("storagePath") + fileName
 
 	_, err = h.usecase.UpdateUser(oldUserData)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	return ctx.JSON(http.StatusCreated, viper.GetString("imageStoragePath")+fileName)
+	return ctx.JSON(http.StatusCreated, viper.GetString("storagePath")+fileName)
 }
 
 // handleLogout - delete session

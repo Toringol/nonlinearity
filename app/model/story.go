@@ -17,17 +17,16 @@ type Heading struct {
 
 // Story - record structure for mongoDB
 type Story struct {
-	ID          int64  `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Image       string `json:"image"`
-	StoryPath   string `json:"storyPath"`
-	Author      string `json:"author"`
-	// Genres          []string      `json:"genres" bson:"genres"`
+	ID              int64     `json:"id"`
+	Title           string    `json:"title"`
+	Description     string    `json:"description"`
+	Image           string    `json:"image"`
+	StoryPath       string    `json:"storyPath"`
+	Author          string    `json:"author"`
 	EditorChoice    bool      `json:"editorChoice"`
-	RatingsNumber   int       `json:"ratingsNumber"`
+	RatingsNumber   int64     `json:"ratingsNumber"`
 	Rating          float64   `json:"rating"`
-	Views           int       `json:"views"`
+	Views           int64     `json:"views"`
 	PublicationDate time.Time `json:"publicationDate"`
 }
 

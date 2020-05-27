@@ -3,10 +3,13 @@ package main
 import (
 	"log"
 
+	"github.com/Toringol/nonlinearity/app/auth/cookies"
+	"github.com/Toringol/nonlinearity/app/auth/sessionManager"
 	userhttp "github.com/Toringol/nonlinearity/app/user/delivery/http"
 	"github.com/Toringol/nonlinearity/app/user/repository"
 	"github.com/Toringol/nonlinearity/app/user/usecase"
 	"github.com/Toringol/nonlinearity/config"
+	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/spf13/viper"
@@ -21,6 +24,13 @@ func main() {
 	}
 
 	listenAddr := viper.GetString("listenAddr")
+
+	redisConn, err := redis.DialURL(viper.GetString("redisDB"))
+	if err != nil {
+		log.Fatalf("cant connect to redis")
+	}
+
+	cookies.SessManager = sessionManager.NewSessionManager(redisConn)
 
 	e := echo.New()
 
