@@ -64,8 +64,8 @@ func (repo *Repository) SelectTopHeadingsStories(headings map[string]string) (*m
 	for title, heading := range headings {
 		stories := []*model.Story{}
 
-		rows, err := repo.DB.Query("SELECT id, title, description, image, storyPath, author,"+
-			"editorChoice, rating, views, publicationDate"+
+		rows, err := repo.DB.Query("SELECT id, title, image"+
+			"editorChoice, rating"+
 			"FROM stories"+
 			"ORDER BY ? DESC LIMIT 10",
 			heading,
@@ -122,6 +122,59 @@ func (repo *Repository) SelectStoryByID(id int64) (*model.Story, error) {
 	return record, nil
 }
 
+// SelectView - check view of story
+func (repo *Repository) SelectView(storyID int64, userID int64) (bool, error) {
+	view := false
+
+	err := repo.DB.
+		QueryRow("SELECT view FROM storyRaringViews WHERE storyID = ? AND userID = ?", storyID, userID).
+		Scan(&view)
+	if err != nil {
+		return false, err
+	}
+
+	return view, nil
+}
+
+// SelectRate - check rating of story
+func (repo *Repository) SelectRate(storyID int64, userID int64) (float64, bool, error) {
+	rating := false
+	previousRate := float64(0)
+
+	err := repo.DB.
+		QueryRow("SELECT rating, previousRate FROM storyRaringViews WHERE storyID = ? AND userID = ?", storyID, userID).
+		Scan(&rating, &previousRate)
+	if err != nil {
+		return 0, false, err
+	}
+
+	return previousRate, rating, nil
+}
+
+// SelectGenresByStoryID - return all genres of story
+func (repo *Repository) SelectGenresByStoryID(id int64) ([]string, error) {
+	genres := []string{}
+
+	rows, err := repo.DB.Query("SELECT id, genre FROM genres WHERE id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		genre := &model.GenreTable{}
+
+		err = rows.Scan(&genre.StoryID, &genre.Genre)
+		if err != nil {
+			return nil, err
+		}
+
+		genres = append(genres, genre.Genre)
+	}
+
+	return genres, nil
+}
+
 // SelectUserByUsername - select all user`s data by username
 func (repo *Repository) SelectUserByUsername(username string) (*model.User, error) {
 	record := &model.User{}
@@ -163,6 +216,20 @@ func (repo *Repository) CreateStory(elem *model.Story) (int64, error) {
 		elem.Rating,
 		elem.Views,
 		elem.PublicationDate,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+// CreateView - create new view in storyRatingViews table
+func (repo *Repository) CreateView(elem *model.StoryRatingViews) (int64, error) {
+	result, err := repo.DB.Exec(
+		"INSERT INTO storyRaringViews (`storyID`, `userID`, `view`) VALUES (?, ?, ?)",
+		elem.StoryID,
+		elem.UserID,
+		elem.View,
 	)
 	if err != nil {
 		return 0, err
@@ -223,6 +290,25 @@ func (repo *Repository) UpdateStoryViews(id int64) (int64, error) {
 			" `views` = `views` + 1"+
 			" WHERE id = ?",
 		id,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+// UpdateRating - set rating on story
+func (repo *Repository) UpdateRating(elem *model.StoryRatingViews) (int64, error) {
+	elem.Rating = true
+	result, err := repo.DB.Exec(
+		"UPDATE storyRaringViews SET"+
+			" `rating` = ?"+
+			" `previousRate` = ?"+
+			" WHERE storyID = ? AND userID = ?",
+		elem.Rating,
+		elem.PreviousRate,
+		elem.StoryID,
+		elem.UserID,
 	)
 	if err != nil {
 		return 0, err

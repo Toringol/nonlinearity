@@ -225,6 +225,12 @@ func (h *userHandlers) handlerGetStoryInfo(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
+	// Get genres of story
+	story.Genres, err = h.usecase.SelectGenresByStoryID(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
 	return ctx.JSON(http.StatusOK, story)
 }
 
@@ -247,11 +253,30 @@ func (h *userHandlers) handlerGetTopHeadings(ctx echo.Context) error {
 
 // handlerEndStory - inc story views
 func (h *userHandlers) handlerEndStory(ctx echo.Context) error {
+	_, err := cookies.СheckSession(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
 
 	requestID := new(model.RequestIDStory)
 
 	if err := ctx.Bind(requestID); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	userID, err := strconv.ParseInt(cookies.ReadUserID(ctx).ID, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Error")
+	}
+
+	storyRatingViews := &model.StoryRatingViews{
+		StoryID: requestID.ID,
+		UserID:  userID,
+		View:    true,
+	}
+
+	if _, err := h.usecase.CreateView(storyRatingViews); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
 	if _, err := h.usecase.UpdateStoryViews(requestID.ID); err != nil {
@@ -263,11 +288,31 @@ func (h *userHandlers) handlerEndStory(ctx echo.Context) error {
 
 // handlerRateStory - update story rating and return new data of story
 func (h *userHandlers) handlerRateStory(ctx echo.Context) error {
+	_, err := cookies.СheckSession(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
 
 	reqRating := new(model.RequestRating)
 
 	if err := ctx.Bind(reqRating); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+	}
+
+	userID, err := strconv.ParseInt(cookies.ReadUserID(ctx).ID, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Error")
+	}
+
+	storyRatingViews := &model.StoryRatingViews{
+		StoryID:      reqRating.ID,
+		UserID:       userID,
+		Rating:       true,
+		PreviousRate: reqRating.Rating,
+	}
+
+	if _, err := h.usecase.UpdateRating(storyRatingViews); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
 	story, err := h.usecase.UpdateStoryRating(reqRating)

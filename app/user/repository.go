@@ -20,4 +20,13 @@ type Repository interface {
 	CreateStory(*model.Story) (int64, error)
 	UpdateStory(*model.Story) (int64, error)
 	DeleteStory(int64) (int64, error)
+
+	// Story genres table methods
+	SelectGenresByStoryID(int64) ([]string, error)
+
+	// Story rating and views table methods
+	SelectView(int64, int64) (bool, error)
+	SelectRate(int64, int64) (float64, bool, error)
+	CreateView(*model.StoryRatingViews) (int64, error)
+	UpdateRating(*model.StoryRatingViews) (int64, error)
 }

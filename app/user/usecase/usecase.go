@@ -45,6 +45,11 @@ func (u userUsecase) SelectStoryByID(id int64) (*model.Story, error) {
 	return u.repo.SelectStoryByID(id)
 }
 
+// SelectGenresByStoryID - select all genres of story
+func (u userUsecase) SelectGenresByStoryID(id int64) ([]string, error) {
+	return u.repo.SelectGenresByStoryID(id)
+}
+
 // SelectTopHeadingsStories - return top stories
 func (u userUsecase) SelectTopHeadingsStories(headings map[string]string) (*model.StoryHeadings, error) {
 	return u.repo.SelectTopHeadingsStories(headings)
@@ -78,4 +83,24 @@ func (u userUsecase) UpdateStory(story *model.Story) (int64, error) {
 // DeleteStory - delete story by ID
 func (u userUsecase) DeleteStory(id int64) (int64, error) {
 	return u.repo.DeleteStory(id)
+}
+
+// SelectView - return bool view
+func (u userUsecase) SelectView(storyID int64, userID int64) (bool, error) {
+	return u.repo.SelectView(storyID, userID)
+}
+
+// SelectRate - return previous rate and rating
+func (u userUsecase) SelectRate(storyID int64, userID int64) (float64, bool, error) {
+	return u.repo.SelectRate(storyID, userID)
+}
+
+// CreateView - create view in table storyRatingViews
+func (u userUsecase) CreateView(elem *model.StoryRatingViews) (int64, error) {
+	return u.repo.CreateView(elem)
+}
+
+// UpdateRating - set rating and store previous rating
+func (u userUsecase) UpdateRating(elem *model.StoryRatingViews) (int64, error) {
+	return u.repo.UpdateRating(elem)
 }

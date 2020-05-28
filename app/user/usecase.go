@@ -20,4 +20,13 @@ type Usecase interface {
 	CreateStory(*model.Story) (int64, error)
 	UpdateStory(*model.Story) (int64, error)
 	DeleteStory(int64) (int64, error)
+
+	// Genres usecase
+	SelectGenresByStoryID(int64) ([]string, error)
+
+	// RatingView usecase
+	SelectView(int64, int64) (bool, error)
+	SelectRate(int64, int64) (float64, bool, error)
+	CreateView(*model.StoryRatingViews) (int64, error)
+	UpdateRating(*model.StoryRatingViews) (int64, error)
 }

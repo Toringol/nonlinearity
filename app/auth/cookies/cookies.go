@@ -33,7 +33,7 @@ func SetSession(ctx echo.Context, userData *model.User) (*http.Cookie, error) {
 
 	value := map[string]string{
 		"session_id": sessID.ID,
-		"user_id":    strconv.Itoa(int(userData.ID)),
+		"user_id":    strconv.FormatInt(userData.ID, 10),
 	}
 
 	if encoded, err := cookieHandler.Encode("session_token", value); err == nil {
