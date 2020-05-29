@@ -64,10 +64,10 @@ func (repo *Repository) SelectTopHeadingsStories(headings map[string]string) (*m
 	for title, heading := range headings {
 		stories := []*model.Story{}
 
-		rows, err := repo.DB.Query("SELECT id, title, image"+
+		rows, err := repo.DB.Query("SELECT id, title, image,"+
 			"editorChoice, rating"+
-			"FROM stories"+
-			"ORDER BY ? DESC LIMIT 10",
+			" FROM stories"+
+			" ORDER BY ? DESC LIMIT 10",
 			heading,
 		)
 		if err != nil {
@@ -77,8 +77,7 @@ func (repo *Repository) SelectTopHeadingsStories(headings map[string]string) (*m
 
 		for rows.Next() {
 			story := &model.Story{}
-			err = rows.Scan(&story.ID, &story.Title, &story.Description, &story.Image, &story.StoryPath,
-				&story.Author, &story.EditorChoice, &story.Rating, &story.Views, &story.PublicationDate)
+			err = rows.Scan(&story.ID, &story.Title, &story.Image, &story.EditorChoice, &story.Rating)
 			if err != nil {
 				return nil, err
 			}
@@ -143,7 +142,7 @@ func (repo *Repository) SelectView(storyID int64, userID int64) (bool, error) {
 	view := false
 
 	err := repo.DB.
-		QueryRow("SELECT view FROM storyRaringViews WHERE storyID = ? AND userID = ?", storyID, userID).
+		QueryRow("SELECT view FROM storyRatingViews WHERE storyID = ? AND userID = ?", storyID, userID).
 		Scan(&view)
 	if err != nil {
 		return false, err
@@ -158,7 +157,7 @@ func (repo *Repository) SelectRate(storyID int64, userID int64) (float64, bool, 
 	previousRate := float64(0)
 
 	err := repo.DB.
-		QueryRow("SELECT rating, previousRate FROM storyRaringViews WHERE storyID = ? AND userID = ?", storyID, userID).
+		QueryRow("SELECT rating, previousRate FROM storyRatingViews WHERE storyID = ? AND userID = ?", storyID, userID).
 		Scan(&rating, &previousRate)
 	if err != nil {
 		return 0, false, err
@@ -263,7 +262,7 @@ func (repo *Repository) CreateStory(elem *model.Story) (int64, error) {
 // CreateView - create new view in storyRatingViews table
 func (repo *Repository) CreateView(elem *model.StoryRatingViews) (int64, error) {
 	result, err := repo.DB.Exec(
-		"INSERT INTO storyRaringViews (`storyID`, `userID`, `view`) VALUES (?, ?, ?)",
+		"INSERT INTO storyRatingViews (`storyID`, `userID`, `view`) VALUES (?, ?, ?)",
 		elem.StoryID,
 		elem.UserID,
 		elem.View,
@@ -324,13 +323,13 @@ func (repo *Repository) UpdateStory(elem *model.Story) (int64, error) {
 func (repo *Repository) UpdateUserFavourites(id int64, genres *model.FavouriteCategories) (int64, error) {
 	result, err := repo.DB.Exec(
 		"UPDATE userFavourites SET"+
-			" `drama` = `drama` + ?"+
-			" `romance` = `romance` + ?"+
-			" `comedy` = `comedy` + ?"+
-			" `horror` = `horror` + ?"+
-			" `detective` = `detective` + ?"+
-			" `fantasy` = `fantasy` + ?"+
-			" `action` = `action` + ?"+
+			" `drama` = `drama` + ?,"+
+			" `romance` = `romance` + ?,"+
+			" `comedy` = `comedy` + ?,"+
+			" `horror` = `horror` + ?,"+
+			" `detective` = `detective` + ?,"+
+			" `fantasy` = `fantasy` + ?,"+
+			" `action` = `action` + ?,"+
 			" `realism` = `realism` + ?"+
 			" WHERE id = ?",
 		genres.Drama,
@@ -367,8 +366,8 @@ func (repo *Repository) UpdateStoryViews(id int64) (int64, error) {
 func (repo *Repository) UpdateRating(elem *model.StoryRatingViews) (int64, error) {
 	elem.Rating = true
 	result, err := repo.DB.Exec(
-		"UPDATE storyRaringViews SET"+
-			" `rating` = ?"+
+		"UPDATE storyRatingViews SET"+
+			" `rating` = ?,"+
 			" `previousRate` = ?"+
 			" WHERE storyID = ? AND userID = ?",
 		elem.Rating,
@@ -386,7 +385,7 @@ func (repo *Repository) UpdateRating(elem *model.StoryRatingViews) (int64, error
 func (repo *Repository) UpdateStoryRating(reqRating *model.RequestRating) (int64, error) {
 	result, err := repo.DB.Exec(
 		"UPDATE stories SET"+
-			" `ratingsNumber` = `ratingsNumber` + 1"+
+			" `ratingsNumber` = `ratingsNumber` + 1,"+
 			" `rating` = (`rating` * (`ratingsNumber` - 1) + ?) / `ratingsNumber`"+
 			" WHERE id = ?",
 		reqRating.Rating,

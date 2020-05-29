@@ -2,6 +2,8 @@ package http
 
 import (
 	"database/sql"
+	"encoding/base64"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -24,11 +26,11 @@ func NewUserHandler(e *echo.Echo, us user.Usecase) {
 	handlers := userHandlers{usecase: us}
 
 	// User handlers
-	e.GET("/signin/", handlers.handleSignIn)
 	e.GET("/profile/", handlers.handleGetUserProfile)
 	e.GET("/logout/", handlers.handleLogout)
 
 	e.POST("/signup/", handlers.handleSignUp)
+	e.POST("/signin/", handlers.handleSignIn)
 	e.POST("/profile/", handlers.handleChangeUserProfile)
 	e.POST("/changeAvatar/", handlers.handleChangeAvatar)
 
@@ -54,19 +56,22 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 	_, err := h.usecase.SelectUserByUsername(userInput.Username)
 	switch {
 	case err == sql.ErrNoRows:
-		return echo.NewHTTPError(http.StatusConflict, "This username is occupied")
+		break
 	case err != nil:
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	default:
+		return echo.NewHTTPError(http.StatusConflict, "This username is occupied")
 	}
 
 	// Convert open pass to secure pass
-	userInput.Password = string(tools.ConvertPass(userInput.Password))
+	userInput.Password = base64.RawStdEncoding.EncodeToString(tools.ConvertPass(userInput.Password))
 
 	// Path to AWS S3 bucket and defaultAvatar
 	userInput.Avatar = viper.GetString("storagePath") + "avatars/defaultAvatar"
 
 	lastID, err := h.usecase.CreateUser(userInput)
 	if err != nil {
+		log.Println(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
@@ -85,6 +90,9 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Cookie set error")
 	}
 
+	userInput.ID = 0
+	userInput.Password = ""
+
 	return ctx.JSON(http.StatusCreated, userInput)
 }
 
@@ -102,7 +110,12 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	if !tools.CheckPass(tools.ConvertPass(authCredentials.Password), userRecord.Password) {
+	oldPassDecrypted, err := base64.RawStdEncoding.DecodeString(userRecord.Password)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Error")
+	}
+
+	if !tools.CheckPass(oldPassDecrypted, authCredentials.Password) {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Incorrect username or password")
 	}
 
@@ -111,7 +124,10 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Cookie set error")
 	}
 
-	return ctx.JSON(http.StatusOK, authCredentials)
+	userRecord.ID = 0
+	userRecord.Password = ""
+
+	return ctx.JSON(http.StatusOK, userRecord)
 }
 
 // handleGetUserProfile - check session and give data to user
@@ -232,6 +248,7 @@ func (h *userHandlers) handlerGetStoryInfo(ctx echo.Context) error {
 
 	story, err := h.usecase.SelectStoryByID(id)
 	if err != nil {
+		log.Println(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
@@ -255,6 +272,7 @@ func (h *userHandlers) handlerGetTopHeadings(ctx echo.Context) error {
 
 	storyHeadings, err := h.usecase.SelectTopHeadingsStories(headings)
 	if err != nil {
+		log.Println(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
@@ -327,7 +345,7 @@ func (h *userHandlers) handlerEndStory(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	return ctx.JSON(http.StatusOK, nil)
+	return ctx.JSON(http.StatusOK, "Status OK")
 }
 
 // handlerRateStory - update story rating and return new data of story
@@ -359,10 +377,11 @@ func (h *userHandlers) handlerRateStory(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	story, err := h.usecase.UpdateStoryRating(reqRating)
+	_, err = h.usecase.UpdateStoryRating(reqRating)
 	if err != nil {
+		log.Println(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 
-	return ctx.JSON(http.StatusOK, story)
+	return ctx.JSON(http.StatusOK, "Status OK")
 }

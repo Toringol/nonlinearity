@@ -7,7 +7,7 @@ type User struct {
 	Password string `json:"password,omitempty"`
 	Avatar   string `json:"avatar"`
 	// the best categories of User in slice byte format
-	Favourited *FavouriteCategories `json:"favourited"`
+	Favourited *FavouriteCategories `json:"favourited,omitempty"`
 }
 
 // FavouriteCategories - the number of counters

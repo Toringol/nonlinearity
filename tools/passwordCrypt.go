@@ -15,9 +15,11 @@ func HashPass(salt []byte, plainPassword string) []byte {
 
 // CheckPass - check equals of 2 hashes
 func CheckPass(passHash []byte, plainPassword string) bool {
+	var checkPass []byte
+	checkPass = append(checkPass, passHash...)
 	salt := passHash[0:8]
 	userPassHash := HashPass(salt, plainPassword)
-	return bytes.Equal(userPassHash, passHash)
+	return bytes.Equal(userPassHash, checkPass)
 }
 
 // ConvertPass - conver pass into argon2 hashed pass with random salt
