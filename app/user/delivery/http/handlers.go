@@ -134,7 +134,7 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 func (h *userHandlers) handleGetUserProfile(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
 	userData, err := h.usecase.SelectUserByUsername(session.Username)
@@ -159,7 +159,7 @@ func (h *userHandlers) handleGetUserProfile(ctx echo.Context) error {
 func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
 	oldUserData, err := h.usecase.SelectUserByUsername(session.Username)
@@ -200,7 +200,7 @@ func (h *userHandlers) handleChangeUserProfile(ctx echo.Context) error {
 func (h *userHandlers) handleChangeAvatar(ctx echo.Context) error {
 	session, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
 	fileName, err := tools.LoadAvatar(ctx)
@@ -283,7 +283,7 @@ func (h *userHandlers) handlerGetTopHeadings(ctx echo.Context) error {
 func (h *userHandlers) handlerEndStory(ctx echo.Context) error {
 	_, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
 	requestID := new(model.RequestIDStory)
@@ -352,7 +352,7 @@ func (h *userHandlers) handlerEndStory(ctx echo.Context) error {
 func (h *userHandlers) handlerRateStory(ctx echo.Context) error {
 	_, err := cookies.СheckSession(ctx)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
 	reqRating := new(model.RequestRating)
