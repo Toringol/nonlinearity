@@ -108,6 +108,22 @@ func (repo *Repository) SelectUserByID(id int64) (*model.User, error) {
 	return record, nil
 }
 
+// SelectUserFavouritesByID - select user favourites
+func (repo *Repository) SelectUserFavouritesByID(id int64) (*model.FavouriteCategories, error) {
+	record := &model.FavouriteCategories{}
+
+	err := repo.DB.
+		QueryRow("SELECT drama, romance, comedy, horror, detective, fantasy, action, realism"+
+			" FROM userFavourites WHERE id = ?", id).
+		Scan(&record.Drama, &record.Romance, &record.Comedy, &record.Horror, &record.Detective,
+			&record.Fantasy, &record.Action, &record.Realism)
+	if err != nil {
+		return nil, err
+	}
+
+	return record, nil
+}
+
 // SelectStoryByID - select all story`s data by ID
 func (repo *Repository) SelectStoryByID(id int64) (*model.Story, error) {
 	record := &model.Story{}
@@ -201,6 +217,27 @@ func (repo *Repository) CreateUser(elem *model.User) (int64, error) {
 	return result.LastInsertId()
 }
 
+// CreateUserFavourites - create new record in DB about user Favourites
+func (repo *Repository) CreateUserFavourites(id int64, elem *model.FavouriteCategories) (int64, error) {
+	result, err := repo.DB.Exec(
+		"INSERT INTO userFavourites (`id`, `drama`, `romance`, `comedy`, `horror`, `detective`,"+
+			"`fantasy`, `action`, `realism`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		id,
+		elem.Drama,
+		elem.Romance,
+		elem.Comedy,
+		elem.Horror,
+		elem.Detective,
+		elem.Fantasy,
+		elem.Action,
+		elem.Realism,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
 // CreateStory - create new story in story table
 func (repo *Repository) CreateStory(elem *model.Story) (int64, error) {
 	result, err := repo.DB.Exec(
@@ -276,6 +313,35 @@ func (repo *Repository) UpdateStory(elem *model.Story) (int64, error) {
 		elem.EditorChoice,
 		elem.PublicationDate,
 		elem.ID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+// UpdateUserFavourites - increment favourite genres
+func (repo *Repository) UpdateUserFavourites(id int64, genres *model.FavouriteCategories) (int64, error) {
+	result, err := repo.DB.Exec(
+		"UPDATE userFavourites SET"+
+			" `drama` = `drama` + ?"+
+			" `romance` = `romance` + ?"+
+			" `comedy` = `comedy` + ?"+
+			" `horror` = `horror` + ?"+
+			" `detective` = `detective` + ?"+
+			" `fantasy` = `fantasy` + ?"+
+			" `action` = `action` + ?"+
+			" `realism` = `realism` + ?"+
+			" WHERE id = ?",
+		genres.Drama,
+		genres.Romance,
+		genres.Comedy,
+		genres.Horror,
+		genres.Detective,
+		genres.Fantasy,
+		genres.Action,
+		genres.Realism,
+		id,
 	)
 	if err != nil {
 		return 0, err

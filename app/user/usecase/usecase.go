@@ -104,3 +104,18 @@ func (u userUsecase) CreateView(elem *model.StoryRatingViews) (int64, error) {
 func (u userUsecase) UpdateRating(elem *model.StoryRatingViews) (int64, error) {
 	return u.repo.UpdateRating(elem)
 }
+
+// SelectUserFavouritesByID - select user favourites by ID
+func (u userUsecase) SelectUserFavouritesByID(id int64) (*model.FavouriteCategories, error) {
+	return u.repo.SelectUserFavouritesByID(id)
+}
+
+// CreateUserFavourites - create user favourites
+func (u userUsecase) CreateUserFavourites(id int64, elem *model.FavouriteCategories) (int64, error) {
+	return u.repo.CreateUserFavourites(id, elem)
+}
+
+// UpdateUserFavourites - update user favourites after view story
+func (u userUsecase) UpdateUserFavourites(id int64, genres *model.FavouriteCategories) (int64, error) {
+	return u.repo.UpdateUserFavourites(id, genres)
+}

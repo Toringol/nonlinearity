@@ -11,6 +11,11 @@ type Repository interface {
 	UpdateUser(*model.User) (int64, error)
 	DeleteUser(int64) (int64, error)
 
+	// FavouritedCategories table
+	SelectUserFavouritesByID(int64) (*model.FavouriteCategories, error)
+	CreateUserFavourites(int64, *model.FavouriteCategories) (int64, error)
+	UpdateUserFavourites(int64, *model.FavouriteCategories) (int64, error)
+
 	// Story table methods
 	SelectStoryByID(int64) (*model.Story, error)
 	SelectTopHeadingsStories(map[string]string) (*model.StoryHeadings, error)

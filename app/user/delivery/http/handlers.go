@@ -65,10 +65,15 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 	// Path to AWS S3 bucket and defaultAvatar
 	userInput.Avatar = viper.GetString("storagePath") + "avatars/defaultAvatar"
 
-	// Favourites - for new user its empty structure
-	userInput.Favourited = []byte("{}")
-
 	lastID, err := h.usecase.CreateUser(userInput)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	// Favourites - for new user its empty structure
+	favourites := &model.FavouriteCategories{}
+
+	_, err = h.usecase.CreateUserFavourites(lastID, favourites)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
@@ -117,6 +122,11 @@ func (h *userHandlers) handleGetUserProfile(ctx echo.Context) error {
 	}
 
 	userData, err := h.usecase.SelectUserByUsername(session.Username)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	userData.Favourited, err = h.usecase.SelectUserFavouritesByID(userData.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
@@ -280,6 +290,40 @@ func (h *userHandlers) handlerEndStory(ctx echo.Context) error {
 	}
 
 	if _, err := h.usecase.UpdateStoryViews(requestID.ID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	genres, err := h.usecase.SelectGenresByStoryID(requestID.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
+
+	genresViewed := &model.FavouriteCategories{}
+
+	for _, genre := range genres {
+		switch genre {
+		case "drama":
+			genresViewed.Drama++
+		case "romance":
+			genresViewed.Romance++
+		case "comedy":
+			genresViewed.Comedy++
+		case "horror":
+			genresViewed.Horror++
+		case "detective":
+			genresViewed.Detective++
+		case "fantasy":
+			genresViewed.Fantasy++
+		case "action":
+			genresViewed.Action++
+		case "realism":
+			genresViewed.Realism++
+		default:
+			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Error")
+		}
+	}
+
+	if _, err := h.usecase.UpdateUserFavourites(userID, genresViewed); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
 

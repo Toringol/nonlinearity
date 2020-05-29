@@ -1,9 +1,5 @@
 package model
 
-import (
-	"encoding/json"
-)
-
 // User - user data in DataBase
 type User struct {
 	ID       int64  `json:"id,omitempty"`
@@ -11,12 +7,11 @@ type User struct {
 	Password string `json:"password,omitempty"`
 	Avatar   string `json:"avatar"`
 	// the best categories of User in slice byte format
-	Favourited json.RawMessage `json:"favourited"`
+	Favourited *FavouriteCategories `json:"favourited"`
 }
 
 // FavouriteCategories - the number of counters
-// preferences of User that
-// futher decodes to json.RawMessage struct User
+// preferences of Use
 type FavouriteCategories struct {
 	Drama     int64 `json:"drama"`
 	Romance   int64 `json:"romance"`
