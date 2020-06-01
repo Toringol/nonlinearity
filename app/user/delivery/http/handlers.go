@@ -114,9 +114,6 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 	case err != nil:
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
-	}
 
 	oldPassDecrypted, err := base64.RawStdEncoding.DecodeString(userRecord.Password)
 	if err != nil {
