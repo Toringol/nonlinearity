@@ -108,6 +108,12 @@ func (h *userHandlers) handleSignIn(ctx echo.Context) error {
 	}
 
 	userRecord, err := h.usecase.SelectUserByUsername(authCredentials.Username)
+	switch {
+	case err == sql.ErrNoRows:
+		return echo.NewHTTPError(http.StatusUnauthorized, "Incorrect username or password")
+	case err != nil:
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
+	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal DB Error")
 	}
