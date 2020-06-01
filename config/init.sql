@@ -61,11 +61,59 @@ CREATE TABLE `storyRatingViews` (
 
 -- First insert to DB
 
-INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`)
-VALUES (1, 'LoveStory', 'Story about one man and girl', 'somePic', 'SomeStory', 'Toringol', true);
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (1, 'LoveStory', 'Story about one man and girl', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/romance.jpeg', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', 'Toringol', false, 1, 1.2, 3);
 
-INSERT INTO genres (`id`, `genre`) VALUES (1, 'someGenre');
-INSERT INTO genres (`id`, `genre`) VALUES (1, 'someGenre');
+INSERT INTO genres (`id`, `genre`) VALUES (1, 'romance');
+
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (2, 'The man', 'Once upon the time one man from desert find sth', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/drama.jpeg', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', 'Yulia', false, 1, 4.5, 4);
+
+INSERT INTO genres (`id`, `genre`) VALUES (2, 'drama');
+
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (3, 'Life', 'The life through the eyes Bob Dickman', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/action-realism.jpg', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', 'Bob Dickman', false, 1, 4.7, 4);
+
+INSERT INTO genres (`id`, `genre`) VALUES (3, 'action');
+INSERT INTO genres (`id`, `genre`) VALUES (3, 'realism');
+
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (4, 'Toy Story', 'Toy Story is about the secret life of toys when people are not around', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/comedy-fantasy.jpg', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', '‎John Lasseter', false, 1, 5.2, 4);
+
+INSERT INTO genres (`id`, `genre`) VALUES (4, 'comedy');
+INSERT INTO genres (`id`, `genre`) VALUES (4, 'fantasy');
+
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (5, 'A Life full of holes', 'Short stories', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/drama-horror-action.png', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', '‎Mary Papas', false, 1, 7, 5);
+
+INSERT INTO genres (`id`, `genre`) VALUES (5, 'drama');
+INSERT INTO genres (`id`, `genre`) VALUES (5, 'horror');
+INSERT INTO genres (`id`, `genre`) VALUES (5, 'action');
+
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (6, 'Strange story', 'Mysterious murder story', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/detective.jpg', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', '‎Steven King', false, 1, 7.5, 6);
+
+INSERT INTO genres (`id`, `genre`) VALUES (6, 'detective');
+
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (7, 'Real Story', 'Story based on real story', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/realism-romance.jpg', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', '‎Steven King', true, 1, 8.5, 7);
+
+INSERT INTO genres (`id`, `genre`) VALUES (7, 'realism');
+INSERT INTO genres (`id`, `genre`) VALUES (7, 'romance');
+
+INSERT INTO stories (`id`, `title`, `description`, `image`, `storyPath`, `author`, `editorChoice`, `ratingsNumber`, `rating`, `views`)
+VALUES (8, 'American horror story', 'If you are looking for horror, you got to the right place', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/storyImage/horror.jpeg', 
+'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/stories/test-story.json', 'Ryan Murphy', true, 1, 9, 10);
+
+INSERT INTO genres (`id`, `genre`) VALUES (8, 'horror');
+
 
 INSERT INTO `users` (`id`, `login`, `password`, `avatar`) VALUES (1, 'test', '123', 'somePic');
 

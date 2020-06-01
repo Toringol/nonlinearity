@@ -67,7 +67,7 @@ func (repo *Repository) SelectTopHeadingsStories(headings map[string]string) (*m
 		rows, err := repo.DB.Query("SELECT id, title, image,"+
 			"editorChoice, rating"+
 			" FROM stories"+
-			" ORDER BY ? DESC LIMIT 10",
+			" ORDER BY ? DESC LIMIT 4",
 			heading,
 		)
 		if err != nil {

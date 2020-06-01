@@ -265,9 +265,9 @@ func (h *userHandlers) handlerGetStoryInfo(ctx echo.Context) error {
 func (h *userHandlers) handlerGetTopHeadings(ctx echo.Context) error {
 
 	headings := map[string]string{
-		"Now popular":   "views",
-		"Short stories": "description",
-		"New":           "publicationDate",
+		"Сейчас популярно": "views",
+		"Короткие истории": "description",
+		"Новинки":          "publicationDate",
 	}
 
 	storyHeadings, err := h.usecase.SelectTopHeadingsStories(headings)
