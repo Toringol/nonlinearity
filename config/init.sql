@@ -115,8 +115,9 @@ VALUES (8, 'Американская история ужасов', 'Если в�
 INSERT INTO genres (`id`, `genre`) VALUES (8, 'ужасы');
 
 
-INSERT INTO `users` (`id`, `login`, `password`, `avatar`) VALUES (1, 'test', '123', 'somePic');
+INSERT INTO `users` (`id`, `login`, `password`, `avatar`) VALUES (1, 'testUser', 'Op4wlDuwonp1pf5ubNutOxJkSx9QBWnjYi8bBd/Qn0mXCgvaegRNWA', 'https://toringolimagestorage.s3.eu-north-1.amazonaws.com/avatars/defaultAvatar.png');
 
-
+INSERT INTO userFavourites (`id`, `drama`, `romance`, `comedy`, `horror`, `detective`, `fantasy`, `action`, `realism`) 
+VALUES (1, 5, 1, 3, 10, 7, 2, 6, 8);
 
 

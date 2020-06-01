@@ -66,8 +66,10 @@ func (h *userHandlers) handleSignUp(ctx echo.Context) error {
 	// Convert open pass to secure pass
 	userInput.Password = base64.RawStdEncoding.EncodeToString(tools.ConvertPass(userInput.Password))
 
+	log.Println(userInput.Password)
+
 	// Path to AWS S3 bucket and defaultAvatar
-	userInput.Avatar = viper.GetString("storagePath") + "avatars/defaultAvatar"
+	userInput.Avatar = viper.GetString("storagePath") + "avatars/defaultAvatar.png"
 
 	lastID, err := h.usecase.CreateUser(userInput)
 	if err != nil {
