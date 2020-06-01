@@ -64,11 +64,12 @@ func (repo *Repository) SelectTopHeadingsStories(headings map[string]string) (*m
 	for title, heading := range headings {
 		stories := []*model.Story{}
 
-		rows, err := repo.DB.Query("SELECT id, title, image,"+
-			"editorChoice, rating"+
-			" FROM stories"+
-			" ORDER BY ? DESC LIMIT 4",
-			heading,
+		log.Println(heading)
+
+		rows, err := repo.DB.Query("SELECT id, title, image," +
+			"editorChoice, rating" +
+			" FROM stories" +
+			" ORDER BY " + heading + " DESC LIMIT 4",
 		)
 		if err != nil {
 			return nil, err
@@ -81,6 +82,7 @@ func (repo *Repository) SelectTopHeadingsStories(headings map[string]string) (*m
 			if err != nil {
 				return nil, err
 			}
+			log.Println(story)
 			stories = append(stories, story)
 		}
 
