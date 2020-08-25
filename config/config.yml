@@ -1,0 +1,10 @@
+listenAddr: 127.0.0.1:8080
+
+database: toringol:1234@tcp(localhost:3306)/nonlinearity?parseTime=true
+redisDB: redis://toringol:@localhost:6379/0
+
+sessionKeylen: 10
+
+storagePath: https://toringolimagestorage.s3.eu-north-1.amazonaws.com/
+accessKeyID: AKIAUEU5ZHWT5VVZWEP5
+secretAccessKey: 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
